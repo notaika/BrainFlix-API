@@ -21,13 +21,39 @@ router.get('/:id', (req, res) => {
     }
 });
 
+router.post('/:id/comments', (req, res) => {
+    const videoData = JSON.parse(fs.readFileSync('./data/videos.json'));
+    const params = req.params;
+    const featuredVideo = videoData.find(video => video.id === params.id);
+
+    if (featuredVideo) {
+        
+        const newComment = {
+            id: uuidv4(),
+            name: 'Mohan Muruge',
+            comment: req.body.comment,
+            likes: 0,
+            timestamp: Date.now(),
+        }
+
+        featuredVideo.comments.push(newComment);
+        fs.writeFileSync('./data/videos.json', JSON.stringify(videoData))
+        res.json(newComment)
+        console.log('A new comment was posted')
+    } else {
+        res.status(404).send(`ERROR: Comment could not be submitted.`)
+    }
+    
+});
+
 router.post('/', (req, res) => {
     const videoData = JSON.parse(fs.readFileSync('./data/videos.json'));
+
     const newVideo = {
         id: uuidv4(),
         title: req.body.title,
         channel: 'Mohan Muruge',
-        image: "Uploade-video-preview.jpg",
+        image: "http://localhost:8080/images/Upload-video-preview.jpg",
         description: req.body.description,
         views: "128",
         likes: "34",
@@ -38,7 +64,30 @@ router.post('/', (req, res) => {
     videoData.push(newVideo);
 
     fs.writeFileSync("./data/videos.json", JSON.stringify(videoData))
-    res.send("New video was uploaded.")
+    res.json(newVideo)
+    console.log("New video was uploaded.")
+})
+
+router.delete('/:videoId/comments/:commentId', (req, res) => {
+    const videoData = JSON.parse(fs.readFileSync('./data/videos.json'));
+    const params = req.params;
+    const featuredVideo = videoData.find(video => video.id === params.videoId);
+
+    if (featuredVideo) {
+        const featuredComment = featuredVideo.comments.findIndex(comment => comment.id === params.commentId);
+        if (featuredComment > -1) {
+            const deletedComment = featuredVideo.comments.splice(featuredComment, 1);
+            fs.writeFileSync('./data/videos.json', JSON.stringify(videoData, null, 2), 'utf8');
+            res.send(deletedComment);
+            console.log(`SUCCESS: Comment was sucessfully deleted.`)
+
+        } else {
+            res.status(404).send(`ERROR: No comment with ID was found. No comments were deleted`)
+        }
+    } else {
+        res.status(404).send(`ERROR: No video with given ID was found.`)
+    }
+
 })
 
 module.exports = router;
