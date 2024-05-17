@@ -77,7 +77,7 @@ router.delete('/:videoId/comments/:commentId', (req, res) => {
         const featuredComment = featuredVideo.comments.findIndex(comment => comment.id === params.commentId);
         if (featuredComment > -1) {
             const deletedComment = featuredVideo.comments.splice(featuredComment, 1);
-            fs.writeFileSync('./data/videos.json', JSON.stringify(videoData, null, 2), 'utf8');
+            fs.writeFileSync('./data/videos.json', JSON.stringify(videoData));
             res.send(deletedComment);
             console.log(`SUCCESS: Comment was sucessfully deleted.`)
 
@@ -87,7 +87,17 @@ router.delete('/:videoId/comments/:commentId', (req, res) => {
     } else {
         res.status(404).send(`ERROR: No video with given ID was found.`)
     }
-
+})
+router.put('/:videoId/likes', (req, res) => {
+    const videoData = JSON.parse(fs.readFileSync('./data/videos.json'));
+    const params = req.params;
+    const featuredVideo = videoData.find(video => video.id === params.videoId);
+    
+    if (featuredVideo) {
+        featuredVideo.likes = (parseInt(featuredVideo.likes) + 1).toString();
+        fs.writeFileSync('./data/videos.json', JSON.stringify(videoData))
+        res.json(featuredVideo)
+    }
 })
 
 module.exports = router;
