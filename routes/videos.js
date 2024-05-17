@@ -5,7 +5,7 @@ const fs = require('fs');
 
 router.get('/', (req, res) => {
         const videoData = JSON.parse(fs.readFileSync('./data/videos.json'));
-        console.log("Request for video data was successful");
+        console.log("SUCCESS: Request for video data was successful");
         res.send(videoData);
     });
 
@@ -39,7 +39,7 @@ router.post('/:id/comments', (req, res) => {
         featuredVideo.comments.push(newComment);
         fs.writeFileSync('./data/videos.json', JSON.stringify(videoData))
         res.json(newComment)
-        console.log('A new comment was posted')
+        console.log('SUCCESS: A new comment was posted')
     } else {
         res.status(404).send(`ERROR: Comment could not be submitted.`)
     }
@@ -65,7 +65,7 @@ router.post('/', (req, res) => {
 
     fs.writeFileSync("./data/videos.json", JSON.stringify(videoData))
     res.json(newVideo)
-    console.log("New video was uploaded.")
+    console.log("SUCCESS: New video was uploaded.")
 })
 
 router.delete('/:videoId/comments/:commentId', (req, res) => {
@@ -97,6 +97,8 @@ router.put('/:videoId/likes', (req, res) => {
         featuredVideo.likes = (parseInt(featuredVideo.likes) + 1).toString();
         fs.writeFileSync('./data/videos.json', JSON.stringify(videoData))
         res.json(featuredVideo)
+    } else {
+        res.status(404).send(`ERROR: Unable to like comment`)
     }
 })
 
